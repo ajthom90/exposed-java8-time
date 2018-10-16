@@ -5,7 +5,7 @@
 
 	<groupId>com.andrewthom</groupId>
 	<artifactId>exposed-java8-time</artifactId>
-	<version>0.1</version>
+	<version>0.1.2</version>
 	<packaging>jar</packaging>
 
 	<name>Exposed Java 8 Time Support</name>
@@ -88,6 +88,18 @@
 						<phase>test-compile</phase>
 						<goals>
 							<goal>test-compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
 						</goals>
 					</execution>
 				</executions>
