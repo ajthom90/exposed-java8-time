@@ -1,49 +1,48 @@
 package com.andrewthom.exposed
 
-import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ColumnType
 import org.jetbrains.exposed.sql.Table
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-private val DEFAULT_DATE_TIME_STRING_FORMATTER = DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss.SSSSSS").withLocale(Locale.ROOT).withZone(ZoneId.systemDefault())
-private val SQLITE_DATE_TIME_STRING_FORMATTER = DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss")
+private val DEFAULT_DATE_STRING_FORMATTER = DateTimeFormatter.ofPattern("YYYY-MM-dd").withLocale(Locale.ROOT).withZone(ZoneId.systemDefault())
 
-class InstantColumnType: ColumnType() {
-	override fun sqlType() = "DATETIME"
+class LocalDateColumnType: ColumnType() {
+	override fun sqlType() = "DATE"
 
 	override fun nonNullValueToString(value: Any): String {
 		if (value is String) return value
 
 		val instant = when (value) {
-			is Instant -> value
-			is java.sql.Date -> value.toInstant()
-			is java.sql.Timestamp -> value.toInstant()
+			is org.joda.time.LocalDate -> value.toDate().toInstant().atOffset(ZoneOffset.UTC).toLocalDate()
+			is java.sql.Date -> value.toLocalDate()
+			is java.sql.Timestamp -> value.toLocalDateTime().toLocalDate()
 			else -> error("Unexpected value: $value of ${value::class.qualifiedName}")
 		}
 
-		return DEFAULT_DATE_TIME_STRING_FORMATTER.format(instant)
+		return DEFAULT_DATE_STRING_FORMATTER.format(instant)
 	}
 
 	override fun valueFromDB(value: Any): Any = when(value) {
-		is Instant -> value
-		is java.sql.Date -> value.toInstant()
-		is java.sql.Timestamp -> value.toInstant()
-		is Int -> Instant.ofEpochMilli(value.toLong())
-		is Long -> Instant.ofEpochMilli(value)
-		is String -> DEFAULT_DATE_TIME_STRING_FORMATTER.parse(value, Instant::from)
-		else -> DEFAULT_DATE_TIME_STRING_FORMATTER.parse(value.toString(), Instant::from)
+		is LocalDate -> value
+		is java.sql.Date -> value.toLocalDate()
+		is java.sql.Timestamp -> value.toLocalDateTime().toLocalDate()
+		is Int -> Instant.ofEpochMilli(value.toLong()).atOffset(ZoneOffset.UTC).toLocalDate()
+		is Long -> Instant.ofEpochMilli(value).atOffset(ZoneOffset.UTC).toLocalDate()
+		is String -> DEFAULT_DATE_STRING_FORMATTER.parse(value, Instant::from)
+		else -> DEFAULT_DATE_STRING_FORMATTER.parse(value.toString(), LocalDate::from)
 	}
 
 	override fun notNullValueToDB(value: Any): Any {
-		if (value is Instant) {
-			val millis = value.toEpochMilli()
-			return java.sql.Timestamp(millis)
+		if (value is LocalDate) {
+			return java.sql.Date(value.toEpochDay())
 		}
 		return value
 	}
 }
 
-fun Table.instant(name: String): Column<Instant> = registerColumn(name, InstantColumnType())
+fun Table.javaDate(name: String) = registerColumn<LocalDate>(name, LocalDateColumnType())
