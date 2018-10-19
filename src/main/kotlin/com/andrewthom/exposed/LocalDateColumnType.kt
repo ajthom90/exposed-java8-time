@@ -18,6 +18,7 @@ class LocalDateColumnType: ColumnType() {
 		if (value is String) return value
 
 		val instant = when (value) {
+			is java.time.LocalDate -> value
 			is org.joda.time.LocalDate -> value.toDate().toInstant().atOffset(ZoneOffset.UTC).toLocalDate()
 			is java.sql.Date -> value.toLocalDate()
 			is java.sql.Timestamp -> value.toLocalDateTime().toLocalDate()
