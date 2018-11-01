@@ -7,6 +7,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalField
 import java.util.*
 
 private val DEFAULT_DATE_STRING_FORMATTER = DateTimeFormatter.ofPattern("YYYY-MM-dd").withLocale(Locale.ROOT).withZone(ZoneId.systemDefault())
@@ -40,7 +41,7 @@ class LocalDateColumnType: ColumnType() {
 
 	override fun notNullValueToDB(value: Any): Any {
 		if (value is LocalDate) {
-			return java.sql.Date(value.toEpochDay())
+			return java.sql.Date(value.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli())
 		}
 		return value
 	}
