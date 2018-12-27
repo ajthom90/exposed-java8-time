@@ -9,7 +9,6 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 private val DEFAULT_DATE_TIME_STRING_FORMATTER = DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss.SSSSSS").withLocale(Locale.ROOT).withZone(ZoneId.systemDefault())
-private val SQLITE_DATE_TIME_STRING_FORMATTER = DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss")
 
 class InstantColumnType: ColumnType() {
 	override fun sqlType() = "DATETIME"
