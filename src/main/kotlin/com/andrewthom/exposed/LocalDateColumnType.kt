@@ -26,7 +26,7 @@ class LocalDateColumnType: ColumnType() {
 			else -> error("Unexpected value: $value of ${value::class.qualifiedName}")
 		}
 
-		return DEFAULT_DATE_STRING_FORMATTER.format(instant)
+		return "'${DEFAULT_DATE_STRING_FORMATTER.format(instant)}'"
 	}
 
 	override fun valueFromDB(value: Any): Any = when(value) {
